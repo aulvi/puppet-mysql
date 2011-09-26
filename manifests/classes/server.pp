@@ -50,6 +50,10 @@ class mysql::server {
     require => Package["mysql-server"],
   }
 
+  file { "/usr/share/augeas/lenses/contrib":
+    ensure => directory;
+  }
+
   file { "/usr/share/augeas/lenses/contrib/mysql.aug":
     ensure => present,
     source => "puppet:///mysql/mysql.aug",
