@@ -23,9 +23,10 @@ Available parameters:
 */
 define mysql::rights($database, $user, $password, $host="localhost", $ensure="present", $priv="all") {
 
-  if $ensure == "present" {
+  if $mysql_exists == "true" {
     if ! defined(Mysql_user ["${user}@${host}"]) {
       mysql_user { "${user}@${host}":
+        ensure => $ensure,
         password_hash => mysql_password($password),
       }
     }
