@@ -9,7 +9,7 @@ class mysql::slave inherits mysql::slave::common {
 
   # binlog_format comes with MySQL 5.1+
   # RHEL6+, Debian6+
-  case  $operatingsystem {
+  case  $::operatingsystem {
 
     Debian: {
       case $lsbmajdistrelease {
@@ -43,6 +43,6 @@ class mysql::slave inherits mysql::slave::common {
 
     } # RedHat,CentOS
 
-  } # case $operatingsystem
+  } # case $::operatingsystem
 
 }

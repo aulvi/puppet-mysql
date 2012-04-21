@@ -68,16 +68,16 @@ class mysql::server {
       "set character-set-server utf8",
       "set log-warnings 1",
       "set datadir ${mysql::params::data_dir}",
-      $operatingsystem ? {
+      $::operatingsystem ? {
         /RedHat|Fedora|CentOS/ => "set log-error /var/log/mysqld.log",
         default => "set log-error /var/log/mysql.err",
       },
-      $operatingsystem ? {
+      $::operatingsystem ? {
         /RedHat|Fedora|CentOS/ => "set log-slow-queries /var/log/mysql-slow-queries.log",
         default => "set log-slow-queries /var/log/mysql/mysql-slow.log",
       },
       #"ins log-slow-admin-statements after log-slow-queries", # BUG: not implemented in puppet yet
-      $operatingsystem ? {
+      $::operatingsystem ? {
         /RedHat|Fedora|CentOS/ => "set socket /var/lib/mysql/mysql.sock",
         default => "set socket /var/run/mysqld/mysqld.sock",
       }
@@ -107,7 +107,7 @@ class mysql::server {
     load_path => "/usr/share/augeas/lenses/contrib/",
     changes => [
       "set pid-file /var/run/mysqld/mysqld.pid",
-      $operatingsystem ? {
+      $::operatingsystem ? {
         /RedHat|Fedora|CentOS/ => "set socket /var/lib/mysql/mysql.sock",
         default => "set socket /var/run/mysqld/mysqld.sock",
       }
@@ -151,7 +151,7 @@ class mysql::server {
     context => "${mysql::params::mycnfctx}/client/",
     load_path => "/usr/share/augeas/lenses/contrib/",
     changes => [
-      $operatingsystem ? {
+      $::operatingsystem ? {
         /RedHat|Fedora|CentOS/ => "set socket /var/lib/mysql/mysql.sock",
         default => "set socket /var/run/mysqld/mysqld.sock",
       }
@@ -162,7 +162,7 @@ class mysql::server {
   service { "mysql":
     ensure      => running,
     enable      => true,
-    name        => $operatingsystem ? {
+    name        => $::operatingsystem ? {
       /RedHat|Fedora|CentOS/ => "mysqld",
       default => "mysql",
     },
@@ -220,7 +220,7 @@ class mysql::server {
 
   file { "/etc/logrotate.d/mysql-server":
     ensure => present,
-    content => $operatingsystem ? {
+    content => $::operatingsystem ? {
       /RedHat|Fedora|CentOS/ => template('mysql/logrotate.redhat.erb'),
                     /Debian/ => template('mysql/logrotate.debian.erb'),
       default => undef,
@@ -233,7 +233,7 @@ class mysql::server {
     group   => mysql,
     mode    => 640,
     seltype => mysqld_log_t,
-    path    => $operatingsystem ? {
+    path    => $::operatingsystem ? {
       /RedHat|Fedora|CentOS/ => "/var/log/mysql-slow-queries.log",
       default => "/var/log/mysql/mysql-slow-queries.log",
     };

@@ -21,9 +21,16 @@ Available parameters:
 - *$priv*: target privileges, defaults to "all" (values are the fieldnames from mysql.db table).
 
 */
-define mysql::rights($database, $user, $password, $host="localhost", $ensure="present", $priv="all") {
+define mysql::rights(
+  $database,
+  $user,
+  $password,
+  $host="localhost",
+  $ensure="present",
+  $priv="all"
+) {
 
-  if $mysql_exists == "true" {
+  if "${::mysql_exists}" == "true" {
     if ! defined(Mysql_user ["${user}@${host}"]) {
       mysql_user { "${user}@${host}":
         ensure => $ensure,

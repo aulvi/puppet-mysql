@@ -8,7 +8,7 @@ class mysql::client {
 
   package { "mysql-client":
     ensure => present,
-    name   => $operatingsystem ? {
+    name   => $::operatingsystem ? {
       /Debian|Ubuntu|kFreeBSD/ => "mysql-client",
       /RedHat|Fedora|CentOS/   => "mysql",
     },
