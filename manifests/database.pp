@@ -2,6 +2,10 @@ define mysql::database($ensure) {
 
   mysql_database { $name:
     ensure => $ensure,
-    require => [ File["/root/.my.cnf"], Service['mysql'], ],
+    require => [
+      File["/root/.my.cnf"],
+      Service['mysql'],
+      Exec["Generate my.cnf"]
+    ],
   }
 }
