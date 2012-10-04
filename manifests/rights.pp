@@ -35,11 +35,13 @@ define mysql::rights(
       mysql_user { "${user}@${host}":
         ensure => $ensure,
         password_hash => mysql_password($password),
+        require => Exec["Generate my.cnf"]
       }
     }
 
     mysql_grant { "${user}@${host}/${database}":
       privileges => $priv,
+      require => Exec["Generate my.cnf"]
     }
   }
 
