@@ -4,8 +4,8 @@ Puppet::Type.type(:mysql_database).provide(:mysql,
 		:parent => Puppet::Provider::Package) do
 
 	desc "Use mysql as database."
-	commands :mysqladmin => '/usr/bin/mysqladmin'
-	commands :mysql => '/usr/bin/mysql'
+	commands :mysqladmin => 'HOME="/root" /usr/bin/mysqladmin'
+	commands :mysql => 'HOME="/root" /usr/bin/mysql'
 
 	# retrieve the current set of mysql users
 	def self.instances

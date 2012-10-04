@@ -24,8 +24,8 @@ Puppet::Type.type(:mysql_grant).provide(:mysql) do
 
 	desc "Uses mysql as database."
 
-	commands :mysql => '/usr/bin/mysql'
-	commands :mysqladmin => '/usr/bin/mysqladmin'
+	commands :mysqladmin => 'HOME="/root" /usr/bin/mysqladmin'
+	commands :mysql => 'HOME="/root" /usr/bin/mysql'
 
 	def mysql_flush 
 		mysqladmin "flush-privileges"
@@ -115,7 +115,7 @@ Puppet::Type.type(:mysql_grant).provide(:mysql) do
 			privs = privs.select do |p| p[0].match(/_priv$/) and p[1] == 'Y' end
 		end
 
-		privs.collect do |p| symbolize(p[0].downcase) end
+		privs.collect do |p| p[0].downcase.to_sym() end
 	end
 
 	def privileges=(privs) 
