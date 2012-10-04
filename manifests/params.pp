@@ -1,6 +1,6 @@
 class mysql::params {
 
-  $mycnf = $operatingsystem ? {
+  $mycnf = $::operatingsystem ? {
     /RedHat|Fedora|CentOS/ => "/etc/my.cnf",
     default => "/etc/mysql/my.cnf",
   }
@@ -23,7 +23,7 @@ class mysql::params {
   }
 
   $logfile_group = $mysql_logfile_group ? {
-    '' => $operatingsystem ? {
+    '' => $::operatingsystem ? {
         'RedHat' => 'mysql',
         'Debian' => 'adm',
         default  => 'adm',
