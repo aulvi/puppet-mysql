@@ -36,8 +36,17 @@ Puppet::Type.type(:mysql_grant).provide(:mysql) do
 		'/usr/bin/mysql'
 	end
 
+	def execute_home(command, options = {})
+		default_options = {
+			:custom_environment => {}
+		}
+		options = default_options.merge(options)
+		options[:custom_environment][:HOME] = '/root'
+		execute(command, options)
+	end
+
 	def mysql_flush 
-		execute([mysqladmin, "flush-privileges"])
+		execute_home([mysqladmin, "flush-privileges"])
 	end
 
 	# this parses the
@@ -65,11 +74,11 @@ Puppet::Type.type(:mysql_grant).provide(:mysql) do
 			name = split_name(@resource[:name])
 			case name[:type]
 			when :user
-				execute [mysql, "mysql", "-e", "INSERT INTO user (host, user) VALUES ('%s', '%s')" % [
+				execute_home [mysql, "mysql", "-e", "INSERT INTO user (host, user) VALUES ('%s', '%s')" % [
 					name[:host], name[:user],
 				]]
 			when :db
-				execute [mysql, "mysql", "-e", "INSERT INTO db (host, user, db) VALUES ('%s', '%s', '%s')" % [
+				execute_home [mysql, "mysql", "-e", "INSERT INTO db (host, user, db) VALUES ('%s', '%s', '%s')" % [
 					name[:host], name[:user], name[:db],
 				]]
 			end
@@ -78,7 +87,7 @@ Puppet::Type.type(:mysql_grant).provide(:mysql) do
 	end
 
 	def destroy
-		execute [mysql, "mysql", "-e", "REVOKE ALL ON '%s'.* FROM '%s@%s'" % [ @resource[:privileges], @resource[:database], @resource[:name], @resource[:host] ]]
+		execute_home [mysql, "mysql", "-e", "REVOKE ALL ON '%s'.* FROM '%s@%s'" % [ @resource[:privileges], @resource[:database], @resource[:name], @resource[:host] ]]
 	end
 	
 	def row_exists?
@@ -87,7 +96,7 @@ Puppet::Type.type(:mysql_grant).provide(:mysql) do
 		if name[:type] == :db
 			fields << :db
 		end
-		not execute([mysql, "mysql", "-NBe", 'SELECT "1" FROM %s WHERE %s' % [ name[:type], fields.map do |f| "%s = '%s'" % [f, name[f]] end.join(' AND ')]]).empty?
+		not execute_home([mysql, "mysql", "-NBe", 'SELECT "1" FROM %s WHERE %s' % [ name[:type], fields.map do |f| "%s = '%s'" % [f, name[f]] end.join(' AND ')]]).empty?
 	end
 
 	def all_privs_set?
@@ -109,9 +118,9 @@ Puppet::Type.type(:mysql_grant).provide(:mysql) do
 
 		case name[:type]
 		when :user
-			privs = execute [mysql, "mysql", "-Be", 'select * from user where user="%s" and host="%s"' % [ name[:user], name[:host] ]]
+			privs = execute_home [mysql, "mysql", "-Be", 'select * from user where user="%s" and host="%s"' % [ name[:user], name[:host] ]]
 		when :db
-			privs = execute [mysql, "mysql", "-Be", 'select * from db where user="%s" and host="%s" and db="%s"' % [ name[:user], name[:host], name[:db] ]]
+			privs = execute_home [mysql, "mysql", "-Be", 'select * from db where user="%s" and host="%s" and db="%s"' % [ name[:user], name[:host], name[:db] ]]
 		end
 
 		if privs.match(/^$/) 
@@ -124,7 +133,7 @@ Puppet::Type.type(:mysql_grant).provide(:mysql) do
 			privs = privs.select do |p| p[0].match(/_priv$/) and p[1] == 'Y' end
 		end
 
-		privs.collect do |p| symbolize(p[0].downcase) end
+		privs.collect do |p| p[0].downcase.to_sym() end
 	end
 
 	def privileges=(privs) 
@@ -157,7 +166,7 @@ Puppet::Type.type(:mysql_grant).provide(:mysql) do
 		# puts "set:", set
 		stmt = stmt << set << where
 
-		execute [mysql, "mysql", "-Be", stmt]
+		execute_home [mysql, "mysql", "-Be", stmt]
 		mysql_flush
 	end
 end

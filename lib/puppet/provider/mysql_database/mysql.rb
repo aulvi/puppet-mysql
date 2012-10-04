@@ -19,11 +19,20 @@ Puppet::Type.type(:mysql_database).provide :mysql, :parent => Puppet::Provider::
 		self.class.mysql
 	end
 
+	def execute_home(command, options = {})
+		default_options = {
+			:custom_environment => {}
+		}
+		options = default_options.merge(options)
+		options[:custom_environment][:HOME] = '/root'
+		execute(command, options)
+	end
+
 	# retrieve the current set of mysql users
 	def self.instances
 		dbs = []
 
-		cmd = "#{mysql} mysql -NBe 'show databases'"
+		cmd = "HOME='/root' #{mysql} mysql -NBe 'show databases'"
 		execpipe(cmd) do |process|
 			process.each do |line|
 				dbs << new( { :ensure => :present, :name => line.chomp } )
@@ -38,7 +47,7 @@ Puppet::Type.type(:mysql_database).provide :mysql, :parent => Puppet::Provider::
 			:ensure => :absent
 		}
 
-		cmd = "#{mysql} mysql -NBe 'show databases'"
+		cmd = "HOME='/root' #{mysql} mysql -NBe 'show databases'"
 		execpipe(cmd) do |process|
 			process.each do |line|
 				if line.chomp.eql?(@resource[:name])
@@ -50,14 +59,14 @@ Puppet::Type.type(:mysql_database).provide :mysql, :parent => Puppet::Provider::
 	end
 
 	def create
-		execute [mysqladmin, "create", @resource[:name]]
+		execute_home [mysqladmin, "create", @resource[:name]]
 	end
 	def destroy
-		execute [mysqladmin, "-f", "drop", @resource[:name]]
+		execute_home [mysqladmin, "-f", "drop", @resource[:name]]
 	end
 
 	def exists?
-		if execute([mysql, "mysql", "-NBe", "show databases"]).match(/^#{@resource[:name]}$/)
+		if execute_home([mysql, "mysql", "-NBe", "show databases"]).match(/^#{@resource[:name]}$/)
 			true
 		else
 			false
