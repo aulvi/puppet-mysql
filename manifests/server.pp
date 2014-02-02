@@ -6,7 +6,6 @@
 class mysql::server {
 
   include mysql::server::base
-
   include mysql::config::performance
   include mysql::config::mysqld
   include mysql::config::replication
