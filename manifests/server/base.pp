@@ -13,6 +13,10 @@ Parameters:
 */
 class mysql::server::base {
 
+  package { "pwgen":
+    ensure => installed,
+  }
+
   include mysql::params
 
   user { "mysql":
@@ -83,8 +87,6 @@ class mysql::server::base {
 
   } else {
 
-    $mysql_password = generate("/usr/bin/pwgen", 20, 1)
-
     file { "/root/.my.cnf":
       owner => root,
       group => root,
@@ -96,9 +98,9 @@ class mysql::server::base {
 
   exec { "Initialize MySQL server root password":
     unless      => "test -f /root/.my.cnf",
-    command     => "mysqladmin -u${mysql_user} password ${mysql_password}",
+    command     => "mysqladmin -u${mysql_user} password `pwgen 20 1`",
     notify      => Exec["Generate my.cnf"],
-    require     => [Package["mysql-server"], Service["mysql"]]
+    require     => [Package["pwgen"], Package["mysql-server"], Service["mysql"]]
   }
 
   exec { "Generate my.cnf":
